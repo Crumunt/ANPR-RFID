@@ -125,5 +125,17 @@ class VehicleController extends Controller
     public function destroy(string $id)
     {
         //
+        DB::beginTransaction();
+        try {
+            Vehicle::findorFail($id)->delete;
+            DB::commit();
+            $msg = ['danger', 'Record Deleted!'];
+            return redirect()->route('admin.manage_vehicle')->with(['msg'=>$msg]);
+        }catch(\Exception $e) {
+            DB::rollback();
+            dd($e);
+            $msg = ['danger', 'Failed to Delete Record! ' . $e->getMessage() ?? ''];
+            return redirect()->route('admin.manage_vehicle')->with(['msg' => $msg]);
+        }
     }
 }
